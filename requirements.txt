@@ -1,0 +1,11 @@
+streamlit
+google-cloud-firestore
+qrcode
+streamlit-folium
+folium
+streamlit-js-eval
+pandas
+python-dotenv
+pillow
+bcrypt
+streamlit-geolocation
