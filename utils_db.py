@@ -8,7 +8,7 @@ import os
 # Initialize Firestore
 def get_db():
     if "db" not in st.session_state:
-        # 1. Try to load from st.secrets (Streamlit Cloud or local secrets.toml)
+        # 1. Try to load from st.secrets
         try:
             if "firestore" in st.secrets:
                 key_dict = json.loads(st.secrets["firestore"]["text_key"])
@@ -19,16 +19,24 @@ def get_db():
             pass
 
         # 2. Try to load from local JSON file
-        json_files = [f for f in os.listdir(".") if f.endswith(".json") and ("firebase-adminsdk" in f or "firestore-key" in f)]
+        cwd = os.getcwd()
+        all_files = os.listdir(".")
+        json_files = [f for f in all_files if f.endswith(".json") and ("firebase-adminsdk" in f or "firestore-key" in f)]
+        
         if json_files:
             try:
                 st.session_state.db = firestore.Client.from_service_account_json(json_files[0])
                 return st.session_state.db
             except Exception as e:
-                st.error(f"Error loading service account JSON: {e}")
-
-        # 3. Last resort: Error message
-        st.error("No Firestore credentials found. Please ensure `.streamlit/secrets.toml` or a service account JSON file exists.")
+                st.error(f"Error loading service account JSON ({json_files[0]}): {e}")
+        
+        # 3. Last resort: Detailed Error
+        st.error(f"No Firestore credentials found.")
+        st.write(f"**Debug Info:**")
+        st.write(f"- CWD: `{cwd}`")
+        st.write(f"- JSON Files found: `{json_files}`")
+        st.write(f"- All local files: `{all_files[:10]}`...")
+        st.info("Please ensure `.streamlit/secrets.toml` or a service account JSON file exists in the current folder.")
         st.stop()
     return st.session_state.db
 
